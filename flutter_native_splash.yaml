@@ -1,0 +1,5 @@
+flutter_native_splash:
+  color: "#1a237e"  # A deep blue (common for church apps)
+  image: assets/images/splash_logo.png
+  android: true
+  ios: true

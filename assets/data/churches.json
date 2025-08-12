@@ -1,0 +1,36 @@
+[
+  {
+    "id": "1",
+    "name": "Addis Ababa Protestant Church",
+    "latitude": 9.0312,
+    "longitude": 38.7636,
+    "images": [
+      "https://example.com/church1.jpg",
+      "https://example.com/church-interior.jpg"
+    ],
+    "serviceTimes": [
+      "Sunday: 7:00 AM (Amharic), 9:00 AM (English), 11:00 AM (Youth)",
+      "Wednesday: Bible Study 7:00 PM"
+    ],
+    "pastor": "Pastor John Doe",
+    "pastorPhone": "+251912345678",
+    "hasParking": true,
+    "language": "Amharic & English",
+    "directionDescription": "Near Central Park, across from City Hall"
+  },
+  {
+    "id": "2",
+    "name": "Faith Bible Fellowship",
+    "latitude": 10.0351,
+    "longitude": 38.7539,
+    "images": [],
+    "serviceTimes": [
+      "Sunday: 10:00 AM (Main Service)",
+      "Tuesday: Prayer Meeting 6:00 PM"
+    ],
+    "pastor": "Pastor Michael Smith",
+    "hasParking": false,
+    "language": "English",
+    "directionDescription": "Next to the main market"
+  }
+]
