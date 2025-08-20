@@ -1,36 +1,153 @@
 [
   {
     "id": "1",
-    "name": "Addis Ababa Protestant Church",
-    "latitude": 9.0312,
-    "longitude": 38.7636,
+    "name": "Asko Meserete Kirstos Church",
+    "latitude": 9.063803094865674, 
+    "longitude": 38.69561969358047,
     "images": [
-      "https://example.com/church1.jpg",
-      "https://example.com/church-interior.jpg"
+      "assets/images/Asko MKC.jpg"
     ],
     "serviceTimes": [
-      "Sunday: 7:00 AM (Amharic), 9:00 AM (English), 11:00 AM (Youth)",
-      "Wednesday: Bible Study 7:00 PM"
+      "Sunday: 2:30 - 4:00 PM (Sermon)",
+      "Sunday: 4:30 - 7:00 PM (Main Service)",
+      "Thursday: 4:00 - 8:00 PM (Healing Service)"
     ],
-    "pastor": "Pastor John Doe",
-    "pastorPhone": "+251912345678",
+    "churchLeader": "Pastor Abenezer",
+    "leaderTitle": "pastor",
+    "leaderPhone": "N/A",
     "hasParking": true,
-    "language": "Amharic & English",
-    "directionDescription": "Near Central Park, across from City Hall"
+    "language": "Amharic",
+    "directionDescription": "Asko area, near main road"
   },
   {
     "id": "2",
-    "name": "Faith Bible Fellowship",
-    "latitude": 10.0351,
-    "longitude": 38.7539,
+    "name": "International Evangelical Church (IEC)",
+    "latitude": 8.997668317875235,
+    "longitude": 38.73855730904909,
+    "images": [
+      "assets/images/iec (2).jpg",
+      "assets/images/iec (1).jpg"
+    ],
+    "serviceTimes": [
+      "Sunday: 3:00 - 4:30 PM (First Service)",
+      "Sunday: 5:30 - 7:00 PM (Second Service)"
+    ],
+    "churchLeader": "Pastor Steve Winstead",
+    "leaderTitle": "pastor",
+    "leaderPhone": "+251 11 371 33611",
+    "hasParking": true,
+    "language": "English",
+    "directionDescription": "Around Addis Ababa City Roads Authority"
+  },
+  {
+    "id": "3",
+    "name": "Beza International Church",
+    "latitude": 9.009723899267103,
+    "longitude": 38.80573918531319,
+    "images": [
+      "assets/images/beza_church.jpg"
+    ],
+    "serviceTimes": [
+      "Sunday: 8:30 - 11:00 AM (Amharic Service)",
+      "Sunday: 11:30 AM - 1:00 PM (English Service)"
+    ],
+    "churchLeader": "Pastor Zerubabel Betemengistu",
+    "leaderTitle": "pastor",
+    "leaderPhone": "N/A",
+    "hasParking": true,
+    "language": "Amharic, English",
+    "directionDescription": "Around Swiss Inn Nexus, Bole area"
+  },
+  {
+    "id": "4",
+    "name": "Ferensay Meserete Kirstos Church",
+    "latitude": 9.0423,
+    "longitude": 38.7612,
     "images": [],
     "serviceTimes": [
-      "Sunday: 10:00 AM (Main Service)",
-      "Tuesday: Prayer Meeting 6:00 PM"
+      "Sunday: 2:30 - 4:00 PM (Prayer Session)",
+      "Sunday: 4:00 - 7:00 PM (Main Service)",
+      "Sunday: 10:00 AM - 1:00 PM (Youth Bible Study)",
+      "Tuesday: 11:00 AM - 1:00 PM (Healing Service)",
+      "Wednesday: 3:00 - 7:00 PM (Fasting Prayer Service)",
+      "Thursday: 12:00 - 2:00 PM (Youth Worship Night)"
     ],
-    "pastor": "Pastor Michael Smith",
+    "churchLeader": "Pastor Mikiyas",
+    "leaderTitle": "pastor",
+    "leaderPhone": "N/A",
     "hasParking": false,
+    "language": "Amharic",
+    "directionDescription": "Ferensay area, near university campus"
+  },
+  {
+    "id": "5",
+    "name": "Sebeta Mekane Eyesus Church",
+    "latitude": 8.911619719851107, 
+    "longitude": 38.62602610054342,
+    "images": [],
+    "serviceTimes": [
+      "Sunday: 1:30 - 4:15 PM (Afaan Oromoo Service)",
+      "Sunday: 4:30 - 7:00 PM (Amharic Service)",
+      "Saturday: 10:00 AM - 12:00 PM (Afaan Oromoo Youth Service)",
+      "Sunday: 10:00 AM - 12:00 PM (Amharic Youth Service)"
+    ],
+    "churchLeader": "Pastor Dauda Mohammed",
+    "leaderTitle": "pastor",
+    "leaderPhone": "N/A",
+    "hasParking": true,
+    "language": "Afaan Oromo, Amharic",
+    "directionDescription": "Sebeta town, Oromo community area"
+  },
+  {
+    "id": "6",
+    "name": "Tigrinya Baptist Church",
+    "latitude": 9.0521,
+    "longitude": 38.7289,
+    "images": [],
+    "serviceTimes": [
+      "Sunday: 7:00 - 9:00 AM (Tigrinya Service)",
+      "Wednesday: 5:00 - 7:00 PM (Youth Service)"
+    ],
+    "churchLeader": "Pastor Tekle Gebre",
+    "leaderTitle": "pastor",
+    "leaderPhone": "N/A",
+    "hasParking": true,
+    "language": "Tigrinya",
+    "directionDescription": "Northern suburbs, near Piazza area"
+  },
+  {
+    "id": "7",
+    "name": "Evening Light Church",
+    "latitude": 9.0187,
+    "longitude": 38.7554,
+    "images": [],
+    "serviceTimes": [
+      "Sunday: 6:00 - 8:00 PM (Evening Service)",
+      "Tuesday: 7:00 - 9:00 PM (Prayer Meeting)"
+    ],
+    "churchLeader": "Pastor Daniel Assefa",
+    "leaderTitle": "pastor",
+    "leaderPhone": "N/A",
+    "hasParking": false,
+    "language": "Amharic",
+    "directionDescription": "Small community church in central area"
+  },
+  {
+    "id": "8",
+    "name": "Weekday Fellowship Center",
+    "latitude": 9.0389,
+    "longitude": 38.7423,
+    "images": [],
+    "serviceTimes": [
+      "Monday: 7:00 - 9:00 PM (Bible Study)",
+      "Wednesday: 6:30 - 8:30 PM (Prayer Meeting)",
+      "Friday: 7:00 - 9:00 PM (Worship Service)"
+    ],
+    "churchLeader": "Pastor Ruth Bekele",
+    "leaderTitle": "pastor",
+    "leaderPhone": "N/A",
+    "hasParking": true,
     "language": "English",
-    "directionDescription": "Next to the main market"
+    "directionDescription": "Downtown business district, near Mexico Square"
   }
 ]
