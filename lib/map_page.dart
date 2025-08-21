@@ -1,13 +1,17 @@
+
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
 import 'package:phosphor_flutter/phosphor_flutter.dart';
-import 'package:location/location.dart';
 import 'package:flutter_map_marker_cluster/flutter_map_marker_cluster.dart';
 import 'dart:convert';
 import 'package:flutter/services.dart';
 import 'dart:async';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:geolocator/geolocator.dart';
+import 'dart:io' show Platform;
+import 'package:flutter/foundation.dart'; // Added for debugPrint
 
 class ChurchSearchState extends ChangeNotifier {
   String _searchQuery = '';
@@ -79,11 +83,11 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   bool _locationError = false;
   AnimationController? _pulseController;
   final MapController _mapController = MapController();
-  final Location _locationService = Location();
   Timer? _searchDebounce;
   final TextEditingController _searchController = TextEditingController();
   double _currentZoom = 6.0;
   bool _isSatelliteView = false;
+  bool _showOnboarding = false;
 
   final ChurchSearchState _searchState = ChurchSearchState();
 
@@ -95,6 +99,55 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       duration: const Duration(seconds: 2),
     )..repeat(reverse: true);
     _searchState.addListener(_onSearchStateChanged);
+    _checkFirstTime();
+    _checkLocationPermission();
+  }
+
+  Future<void> _checkLocationPermission() async {
+  bool serviceEnabled;
+  LocationPermission permission;
+  // Check if location services are enabled
+  serviceEnabled = await Geolocator.isLocationServiceEnabled();
+  if (!serviceEnabled) {
+    await Geolocator.openLocationSettings();
+    return;
+  }
+  // Check for permission status
+  permission = await Geolocator.checkPermission();
+  if (permission == LocationPermission.denied) {
+    permission = await Geolocator.requestPermission();
+    if (permission == LocationPermission.denied) {
+      // User denied permissions permanently
+      return;
+    }
+  }
+  if (permission == LocationPermission.deniedForever) {
+    // Open app settings so user can manually enable
+    await Geolocator.openAppSettings();
+    return;
+  }
+  // If permission is granted, fetch current location
+  _getUserLocation();
+}
+
+  Future<void> _checkFirstTime() async {
+    final prefs = await SharedPreferences.getInstance();
+    final isFirstTime = prefs.getBool('isFirstTime') ?? true;
+    if (isFirstTime) {
+      setState(() {
+        _showOnboarding = true;
+      });
+    } else {
+      _loadData();
+    }
+  }
+
+  Future<void> _completeOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isFirstTime', false);
+    setState(() {
+      _showOnboarding = false;
+    });
     _loadData();
   }
 
@@ -149,28 +202,17 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
 
   Future<void> _getUserLocation() async {
     try {
-      if (!await _locationService.serviceEnabled()) {
-        await _locationService.requestService();
-      }
-
-      var permission = await _locationService.hasPermission();
-      if (permission == PermissionStatus.denied) {
-        permission = await _locationService.requestPermission();
-      }
-
-      if (permission == PermissionStatus.granted) {
-        final locationData = await _locationService.getLocation();
-        setState(() {
-          _userLocation = LatLng(
-            locationData.latitude!,
-            locationData.longitude!,
-          );
-          _locationError = false;
-        });
-        _mapController.move(_userLocation!, 14.0);
-      } else {
-        throw Exception('Location permission denied');
-      }
+      final position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+      setState(() {
+        _userLocation = LatLng(
+          position.latitude,
+          position.longitude,
+        );
+        _locationError = false;
+      });
+      _mapController.move(_userLocation!, 14.0);
     } catch (e) {
       debugPrint('Location error: $e');
       setState(() {
@@ -211,7 +253,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
           onTap: () => _showChurchDetails(church),
           child: _PulsingChurchMarker(
             controller: _pulseController!,
-            color: Theme.of(context).colorScheme.primary,
+            color: const Color(0xFF2196F3),
           ),
         ),
       );
@@ -266,7 +308,7 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
                   ],
                 ),
               )
-            : const SizedBox.shrink(key: const Key('empty_search_indicator')),
+            : const SizedBox.shrink(key: Key('empty_search_indicator')),
       ),
     );
   }
@@ -333,30 +375,19 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
                     ],
                   ),
                 )
-              : const SizedBox.shrink(key: const Key('has_results')),
+              : const SizedBox.shrink(key: Key('has_results')),
         ),
       ),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildMapContent() {
     return Scaffold(
       appBar: AppBar(
         title: const Text("FaithMap"),
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
         actions: [
-          IconButton(
-            icon: Icon(
-              _isSatelliteView ? Icons.map : Icons.satellite,
-              color: _isSatelliteView 
-                  ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.onPrimaryContainer,
-            ),
-            onPressed: _toggleSatelliteView,
-            tooltip: _isSatelliteView ? 'Switch to Map View' : 'Switch to Satellite View',
-          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _loadData,
@@ -416,6 +447,10 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
                   options: MapOptions(
                     center: _userLocation ?? const LatLng(9.145, 40.4897),
                     zoom: _userLocation != null ? 14.0 : 6.0,
+                    minZoom:3,
+                    maxZoom:19,
+                    bounds:LatLngBounds(const LatLng(-35, -180), const LatLng(85, 180)),
+                    boundsOptions:const FitBoundsOptions(padding: EdgeInsets.all(20)),
                     onMapEvent: (event) {
                       WidgetsBinding.instance.addPostFrameCallback((_) {
                         if (mounted && _currentZoom != event.zoom) {
@@ -430,12 +465,16 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
                             urlTemplate:
                                 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
                             userAgentPackageName: 'com.example.faithmap',
+                            maxZoom:20,
+                            maxNativeZoom:19,
                             subdomains: ['a', 'b', 'c'],
                           )
                         : TileLayer(
                             urlTemplate:
                                 'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
                             userAgentPackageName: 'com.example.faithmap',
+                            maxZoom:20,
+                            maxNativeZoom:19,
                           ),
                     
                     if (_userLocation != null)
@@ -566,8 +605,136 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       ),
     );
   }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_showOnboarding) {
+      return OnboardingScreen(onComplete: _completeOnboarding);
+    } else {
+      return _buildMapContent();
+    }
+  }
 }
 
+class OnboardingScreen extends StatefulWidget {
+  final VoidCallback onComplete;
+
+  const OnboardingScreen({super.key, required this.onComplete});
+
+  @override
+  State<OnboardingScreen> createState() => _OnboardingScreenState();
+}
+
+class _OnboardingScreenState extends State<OnboardingScreen> {
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: PageView(
+                controller: _pageController,
+                onPageChanged: (int page) {
+                  setState(() {
+                    _currentPage = page;
+                  });
+                },
+                children: [
+                  _buildSlide(
+                    imagePath: 'assets/images/Slide_1.png',
+                    title: '',
+                    description: 'Discover churches near you with ease.',
+                  ),
+                  _buildSlide(
+                    imagePath: 'assets/images/Slide_2.png',
+                    title: '',
+                    description: 'Search by church name, leader, language, or directions.',
+                  ),
+                  _buildSlide(
+                    imagePath: 'assets/images/Slide_3.png',
+                    title: '',
+                    description: 'Get service times, contact details, and more.',
+                  ),
+                ],
+              ),
+            ),
+            _buildPageIndicator(),
+            const SizedBox(height: 20),
+            if (_currentPage == 2)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: FilledButton(
+                  onPressed: widget.onComplete,
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(double.infinity, 50),
+                  ),
+                  child: const Text('Let\'s Goooo'),
+                ),
+              ),
+            const SizedBox(height: 40),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSlide({
+    required String imagePath,
+    required String title,
+    required String description,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.all(40),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            imagePath,
+            width: double.infinity,
+            fit: BoxFit.contain,  
+          ),
+          const SizedBox(height: 40),
+          Text(
+            title,
+            style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 20),
+          Text(
+            description,
+            style: Theme.of(context).textTheme.bodyLarge,
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildPageIndicator() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(3, (index) {
+        return Container(
+          width: 8,
+          height: 8,
+          margin: const EdgeInsets.symmetric(horizontal: 4),
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: _currentPage == index
+                ? Theme.of(context).colorScheme.primary
+                : Colors.grey.withOpacity(0.4),
+          ),
+        );
+      }),
+    );
+  }
+}
 // ... Keep the rest of your existing _PulsingChurchMarker and _ChurchDetailsCard classes unchanged ...
 
 class _PulsingChurchMarker extends StatelessWidget {
@@ -583,10 +750,22 @@ class _PulsingChurchMarker extends StatelessWidget {
       builder: (ctx, child) {
         return Transform.scale(
           scale: 0.8 + (controller.value * 0.4),
-          child: Icon(
-            PhosphorIcons.church(PhosphorIconsStyle.fill),
-            color: color.withOpacity(0.8 + (controller.value * 0.2)),
-            size: 32,
+          child: Container(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2 + (controller.value * 0.1)),
+                  blurRadius: 4 + (controller.value * 2),
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: Icon(
+              PhosphorIcons.church(PhosphorIconsStyle.fill),
+              color: color.withOpacity(0.8 + (controller.value * 0.2)),
+              size: 32,
+            ),
           ),
         );
       },
@@ -827,14 +1006,80 @@ class __ChurchDetailsCardState extends State<_ChurchDetailsCard> {
       return 'Location unavailable';
     }
 
-    final distance = Distance().as(LengthUnit.Meter, widget.userLocation!, churchLoc);
+    final distance = const Distance().as(LengthUnit.Meter, widget.userLocation!, churchLoc);
     return '${(distance / 1000).toStringAsFixed(1)} km away';
+  }
+
+  String _calculateEstimatedTravelTime() {
+    if (widget.userLocation == null) return '';
+
+    final churchLoc = LatLng(
+      widget.church['latitude']?.toDouble() ?? 0,
+      widget.church['longitude']?.toDouble() ?? 0,
+    );
+
+    if (churchLoc.latitude == 0 || churchLoc.longitude == 0) {
+      return '';
+    }
+
+    final distanceMeters = const Distance().as(LengthUnit.Meter, widget.userLocation!, churchLoc);
+    final distanceKm = distanceMeters / 1000;
+    // Assume average driving speed of 40 km/h for urban areas in Ethiopia (adjustable)
+    const averageSpeedKmh = 40.0;
+    final estimatedMinutes = (distanceKm / averageSpeedKmh) * 60;
+    if (estimatedMinutes < 1) {
+      return 'Less than 1 min (approx.)';
+    } else {
+      return '~${estimatedMinutes.toStringAsFixed(0)} min by car (approx. straight-line)';
+    }
+  }
+
+  bool get _hasValidLocation {
+    final lat = widget.church['latitude']?.toDouble() ?? 0;
+    final long = widget.church['longitude']?.toDouble() ?? 0;
+    return widget.userLocation != null && lat != 0 && long != 0;
+  }
+
+  Future<void> _launchDirections() async {
+    if (!_hasValidLocation) return;
+
+    final userLat = widget.userLocation!.latitude;
+    final userLong = widget.userLocation!.longitude;
+    final churchLat = widget.church['latitude'].toDouble();
+    final churchLong = widget.church['longitude'].toDouble();
+
+    Uri uri;
+    if (Platform.isIOS) {
+      final googleUri = Uri.parse(
+        'comgooglemaps://?saddr=$userLat,$userLong&daddr=$churchLat,$churchLong&directionsmode=driving',
+      );
+      if (await canLaunchUrl(googleUri)) {
+        uri = googleUri;
+      } else {
+        uri = Uri.parse(
+          'http://maps.apple.com/?saddr=$userLat,$userLong&daddr=$churchLat,$churchLong&dirflg=d',
+        );
+      }
+    } else {
+      uri = Uri.parse(
+        'https://www.google.com/maps/dir/?api=1&origin=$userLat,$userLong&destination=$churchLat,$churchLong&travelmode=driving',
+      );
+    }
+
+    if (await canLaunchUrl(uri)) {
+      await launchUrl(uri, mode: LaunchMode.externalApplication);
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not launch maps app')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final serviceTimes =
         (widget.church['serviceTimes'] as List?)?.whereType<String>().toList() ?? [];
+    final estTravelTime = _calculateEstimatedTravelTime();
 
     return GestureDetector(
       onTap: () {},
@@ -926,7 +1171,7 @@ class __ChurchDetailsCardState extends State<_ChurchDetailsCard> {
                               context,
                               icon: Icons.location_on,
                               title: 'Distance',
-                              value: _calculateDistance(),
+                              value: '${_calculateDistance()}${estTravelTime.isNotEmpty ? '\n$estTravelTime' : ''}',
                             ),
                             if (widget.church['directionDescription'] != null && widget.church['directionDescription']!.isNotEmpty)
                               _buildDetailCard(
@@ -966,6 +1211,16 @@ class __ChurchDetailsCardState extends State<_ChurchDetailsCard> {
                             ),
                           ),
                         ),
+                        if (_hasValidLocation) ...[
+                          const SizedBox(height: 24),
+                          FilledButton(
+                            onPressed: _launchDirections,
+                            style: FilledButton.styleFrom(
+                              minimumSize: const Size(double.infinity, 48),
+                            ),
+                            child: const Text('Get Directions'),
+                          ),
+                        ],
                         const SizedBox(height: 30),
                       ],
                     ),
@@ -1031,6 +1286,60 @@ class __ChurchDetailsCardState extends State<_ChurchDetailsCard> {
             style: Theme.of(context).textTheme.bodyMedium,
           ),
         ],
+      ),
+    );
+  }
+}
+
+// Added: Fancy Animated Splash Screen using Lottie
+class SplashScreen extends StatefulWidget {
+  const SplashScreen({super.key});
+
+  @override
+  State<SplashScreen> createState() => _SplashScreenState();
+}
+
+class _SplashScreenState extends State<SplashScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _startTimer();
+  }
+
+  void _startTimer() {
+    Timer(const Duration(seconds: 4), () { // Adjust duration for your animation length
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const MapPage()),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Image.asset(
+              'assets/images/splash_logo.png', // Replace with your actual image path in assets/images
+              width: screenWidth * 0.9, // Increased to make it wider
+              height: screenHeight * 0.6, // Increased to make it bigger
+              fit: BoxFit.contain,
+            ),
+            const SizedBox(height: 20),
+            Text(
+              'Discover Your Faith Journey',
+              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
