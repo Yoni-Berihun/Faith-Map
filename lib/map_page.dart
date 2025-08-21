@@ -13,13 +13,29 @@ class ChurchSearchState extends ChangeNotifier {
   String _searchQuery = '';
   List<Map<String, dynamic>> _allChurches = [];
   List<Map<String, dynamic>> _filteredChurches = [];
+  bool _isSearching = false;
 
   String get searchQuery => _searchQuery;
   List<Map<String, dynamic>> get filteredChurches => _filteredChurches;
+  bool get isSearching => _isSearching;
 
   void updateSearchQuery(String query) {
     _searchQuery = query;
-    _applyFilters();
+    if (query.isEmpty) {
+      _applyFilters();
+      _isSearching = false;
+      notifyListeners();
+    } else {
+      _isSearching = true;
+      notifyListeners();
+      
+      // Simulate search delay for better UX
+      Future.delayed(const Duration(milliseconds: 500), () {
+        _applyFilters();
+        _isSearching = false;
+        notifyListeners();
+      });
+    }
   }
 
   void setAllChurches(List<Map<String, dynamic>> churches) {
@@ -47,7 +63,6 @@ class ChurchSearchState extends ChangeNotifier {
       }
       return true;
     }).toList();
-    notifyListeners();
   }
 }
 
@@ -62,28 +77,39 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   LatLng? _userLocation;
   bool _isLoading = true;
   bool _locationError = false;
-  final List<AnimationController> _pulseControllers = [];
+  AnimationController? _pulseController;
   final MapController _mapController = MapController();
   final Location _locationService = Location();
   Timer? _searchDebounce;
   final TextEditingController _searchController = TextEditingController();
   double _currentZoom = 6.0;
+  bool _isSatelliteView = false;
 
   final ChurchSearchState _searchState = ChurchSearchState();
 
   @override
   void initState() {
     super.initState();
+    _pulseController = AnimationController(
+      vsync: this,
+      duration: const Duration(seconds: 2),
+    )..repeat(reverse: true);
+    _searchState.addListener(_onSearchStateChanged);
     _loadData();
+  }
+
+  void _onSearchStateChanged() {
+    if (mounted) {
+      setState(() {});
+    }
   }
 
   @override
   void dispose() {
     _searchDebounce?.cancel();
+    _searchState.removeListener(_onSearchStateChanged);
     _searchState.dispose();
-    for (var controller in _pulseControllers) {
-      controller.dispose();
-    }
+    _pulseController?.dispose();
     _mapController.dispose();
     _searchController.dispose();
     super.dispose();
@@ -92,7 +118,6 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
   Future<void> _loadData() async {
     setState(() {
       _isLoading = true;
-      _pulseControllers.clear();
     });
 
     try {
@@ -114,13 +139,6 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
       final churches = jsonList
           .map((church) => church as Map<String, dynamic>)
           .toList();
-
-      for (var _ in churches) {
-        _pulseControllers.add(
-          AnimationController(vsync: this, duration: const Duration(seconds: 2))
-            ..repeat(reverse: true),
-        );
-      }
 
       _searchState.setAllChurches(churches);
     } catch (e) {
@@ -172,6 +190,12 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
     );
   }
 
+  void _toggleSatelliteView() {
+    setState(() {
+      _isSatelliteView = !_isSatelliteView;
+    });
+  }
+
   List<Marker> _getVisibleMarkers() {
     final churches = _searchState.filteredChurches;
     return List<Marker>.generate(churches.length, (index) {
@@ -186,12 +210,133 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         builder: (ctx) => GestureDetector(
           onTap: () => _showChurchDetails(church),
           child: _PulsingChurchMarker(
-            controller: _pulseControllers[index],
+            controller: _pulseController!,
             color: Theme.of(context).colorScheme.primary,
           ),
         ),
       );
     });
+  }
+
+  Widget _buildSearchIndicator() {
+    return Positioned(
+      top: 80,
+      left: 0,
+      right: 0,
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child: _searchState.isSearching
+            ? Container(
+                key: const Key('search_indicator'),
+                padding: const EdgeInsets.all(12),
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.9),
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.2),
+                      blurRadius: 8,
+                      offset: const Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(
+                          Theme.of(context).colorScheme.onPrimary,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text(
+                      'Searching churches...',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onPrimary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              )
+            : const SizedBox.shrink(key: const Key('empty_search_indicator')),
+      ),
+    );
+  }
+
+  Widget _buildNoResultsFound() {
+    final showNoResults = _searchState.searchQuery.isNotEmpty &&
+        _searchState.filteredChurches.isEmpty &&
+        !_searchState.isSearching;
+
+    return Positioned.fill(
+      child: Align(
+        alignment: Alignment.center,
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 300),
+          child: showNoResults
+              ? Container(
+                  key: const Key('no_results'),
+                  padding: const EdgeInsets.all(24),
+                  margin: const EdgeInsets.symmetric(horizontal: 40),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).colorScheme.surface,
+                    borderRadius: BorderRadius.circular(16),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 12,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.search_off,
+                        size: 48,
+                        color: Theme.of(context).colorScheme.primary.withOpacity(0.6),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'No churches found',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'Try different search terms or check your spelling',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                            ),
+                        textAlign: TextAlign.center,
+                      ),
+                      const SizedBox(height: 16),
+                      FilledButton(
+                        onPressed: () {
+                          _searchController.clear();
+                          _searchState.updateSearchQuery('');
+                        },
+                        child: const Text('Clear Search'),
+                      ),
+                    ],
+                  ),
+                )
+              : const SizedBox.shrink(key: const Key('has_results')),
+        ),
+      ),
+    );
   }
 
   @override
@@ -202,6 +347,16 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
         backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         foregroundColor: Theme.of(context).colorScheme.onPrimaryContainer,
         actions: [
+          IconButton(
+            icon: Icon(
+              _isSatelliteView ? Icons.map : Icons.satellite,
+              color: _isSatelliteView 
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.onPrimaryContainer,
+            ),
+            onPressed: _toggleSatelliteView,
+            tooltip: _isSatelliteView ? 'Switch to Map View' : 'Switch to Satellite View',
+          ),
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: _loadData,
@@ -270,11 +425,19 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
                     },
                   ),
                   children: [
-                    TileLayer(
-                      urlTemplate:
-                          'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
-                      userAgentPackageName: 'com.example.faithmap',
-                    ),
+                    _isSatelliteView
+                        ? TileLayer(
+                            urlTemplate:
+                                'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                            userAgentPackageName: 'com.example.faithmap',
+                            subdomains: ['a', 'b', 'c'],
+                          )
+                        : TileLayer(
+                            urlTemplate:
+                                'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+                            userAgentPackageName: 'com.example.faithmap',
+                          ),
+                    
                     if (_userLocation != null)
                       MarkerLayer(
                         markers: [
@@ -322,8 +485,17 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
                     ),
                   ],
                 ),
+                
+                // Loading indicator for initial load
                 if (_isLoading)
                   const Center(child: CircularProgressIndicator()),
+                
+                // Search in progress indicator
+                _buildSearchIndicator(),
+                
+                // No results found message
+                _buildNoResultsFound(),
+                
                 if (_locationError)
                   Positioned(
                     top: 10,
@@ -343,20 +515,60 @@ class _MapPageState extends State<MapPage> with TickerProviderStateMixin {
                       ),
                     ),
                   ),
+                
+                // View mode indicator
+                Positioned(
+                  top: 10,
+                  right: 10,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withOpacity(0.7),
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      _isSatelliteView ? 'Satellite View' : 'Map View',
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _getUserLocation,
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        foregroundColor: Theme.of(context).colorScheme.onPrimary,
-        child: const Icon(Icons.my_location),
+      floatingActionButton: Column(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            onPressed: _toggleSatelliteView,
+            backgroundColor: _isSatelliteView
+                ? Theme.of(context).colorScheme.secondary
+                : Theme.of(context).colorScheme.primary,
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            mini: true,
+            heroTag: 'satellite_fab',
+            child: Icon(_isSatelliteView ? Icons.map : Icons.satellite),
+          ),
+          const SizedBox(height: 16),
+          FloatingActionButton(
+            onPressed: _getUserLocation,
+            backgroundColor: Theme.of(context).colorScheme.primary,
+            foregroundColor: Theme.of(context).colorScheme.onPrimary,
+            heroTag: 'location_fab',
+            child: const Icon(Icons.my_location),
+          ),
+        ],
       ),
     );
   }
 }
+
+// ... Keep the rest of your existing _PulsingChurchMarker and _ChurchDetailsCard classes unchanged ...
 
 class _PulsingChurchMarker extends StatelessWidget {
   final AnimationController controller;

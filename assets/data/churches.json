@@ -100,20 +100,21 @@
   },
   {
     "id": "6",
-    "name": "Tigrinya Baptist Church",
-    "latitude": 9.0521,
-    "longitude": 38.7289,
+    "name": "Halwot Emmanuel united Church",
+    "latitude": 8.98220124940704,
+    "longitude": 38.76605515605233,
     "images": [],
     "serviceTimes": [
-      "Sunday: 7:00 - 9:00 AM (Tigrinya Service)",
-      "Wednesday: 5:00 - 7:00 PM (Youth Service)"
+      "Sunday: 4:00 - 7:00 LT(Sunday Service)",
+      "Tuesday: 11:00 - 2:00 LT ()",
+      "Thursday: 10:30 - 2:00 LT ()"
     ],
-    "churchLeader": "Pastor Tekle Gebre",
+    "churchLeader": "Pastor Zenebe Girma",
     "leaderTitle": "pastor",
     "leaderPhone": "N/A",
     "hasParking": true,
-    "language": "Tigrinya",
-    "directionDescription": "Northern suburbs, near Piazza area"
+    "language": "Amharic",
+    "directionDescription": "Around Alpha Cardiac Speciality Clinic"
   },
   {
     "id": "7",
@@ -134,20 +135,21 @@
   },
   {
     "id": "8",
-    "name": "Weekday Fellowship Center",
-    "latitude": 9.0389,
-    "longitude": 38.7423,
+    "name": "Sendafa Meserete Kiristos Church",
+    "latitude": 9.143461237307164, 
+    "longitude": 39.018960253453805,
     "images": [],
     "serviceTimes": [
-      "Monday: 7:00 - 9:00 PM (Bible Study)",
-      "Wednesday: 6:30 - 8:30 PM (Prayer Meeting)",
-      "Friday: 7:00 - 9:00 PM (Worship Service)"
+      "Tuesday: 12:00  - 1:00 LT (Healing Service)",
+      "Friday: 2:00 - 6:00 LT (Fasting and prayer )",
+      "Sunday: 3:00 - 6:00 LT (Sunday Service) ",
+      "Sunday: 9:00 - 12:00 LT(Youth Progrma"
     ],
     "churchLeader": "Pastor Ruth Bekele",
     "leaderTitle": "pastor",
     "leaderPhone": "N/A",
     "hasParking": true,
-    "language": "English",
-    "directionDescription": "Downtown business district, near Mexico Square"
+    "language": "Amharic and Afaan Oromoo",
+    "directionDescription": "N/A"
   }
 ]
