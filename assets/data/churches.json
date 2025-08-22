@@ -17,7 +17,7 @@
     "leaderPhone": "N/A",
     "hasParking": true,
     "language": "Amharic",
-    "directionDescription": "Asko area, near main road"
+    "directionDescription": "N/A"
   },
   {
     "id": "2",
@@ -45,7 +45,7 @@
     "latitude": 9.009723899267103,
     "longitude": 38.80573918531319,
     "images": [
-      "assets/images/beza_church.jpg"
+      
     ],
     "serviceTimes": [
       "Sunday: 8:30 - 11:00 AM (Amharic Service)",
@@ -77,26 +77,29 @@
     "leaderPhone": "N/A",
     "hasParking": false,
     "language": "Amharic",
-    "directionDescription": "Ferensay area, near university campus"
+    "directionDescription": "N/A"
   },
   {
     "id": "5",
     "name": "Sebeta Mekane Eyesus Church",
     "latitude": 8.911619719851107, 
     "longitude": 38.62602610054342,
-    "images": [],
+    "images": [  "assets/images/Sebeta1.jpg",
+  "assets/images/Sebeta2.jpg",
+  "assets/images/Sebeta3.jpg"
+],
     "serviceTimes": [
       "Sunday: 1:30 - 4:15 PM (Afaan Oromoo Service)",
       "Sunday: 4:30 - 7:00 PM (Amharic Service)",
       "Saturday: 10:00 AM - 12:00 PM (Afaan Oromoo Youth Service)",
       "Sunday: 10:00 AM - 12:00 PM (Amharic Youth Service)"
     ],
-    "churchLeader": "Pastor Dauda Mohammed",
-    "leaderTitle": "pastor",
+    "churchLeader": "Bishop Tesema Shume ",
+    "leaderTitle": "bishop",
     "leaderPhone": "N/A",
     "hasParking": true,
     "language": "Afaan Oromo, Amharic",
-    "directionDescription": "Sebeta town, Oromo community area"
+    "directionDescription": "N/A"
   },
   {
     "id": "6",
@@ -118,20 +121,20 @@
   },
   {
     "id": "7",
-    "name": "Evening Light Church",
-    "latitude": 9.0187,
-    "longitude": 38.7554,
+    "name": "Kotebe Genet Muluwengel Church",
+    "latitude": 9.04738406844206,
+    "longitude": 38.8424892111688,
     "images": [],
     "serviceTimes": [
-      "Sunday: 6:00 - 8:00 PM (Evening Service)",
-      "Tuesday: 7:00 - 9:00 PM (Prayer Meeting)"
+      "Sunday: 3:00 - 6:30 LT (Sunday Service)",
+      "Wednesday: 4:00 - 8:30 PM (Healing Service)"
     ],
-    "churchLeader": "Pastor Daniel Assefa",
+    "churchLeader": "Pastor Berihun M.",
     "leaderTitle": "pastor",
     "leaderPhone": "N/A",
     "hasParking": false,
     "language": "Amharic",
-    "directionDescription": "Small community church in central area"
+    "directionDescription": "Around Selam Dabo"
   },
   {
     "id": "8",
@@ -143,13 +146,101 @@
       "Tuesday: 12:00  - 1:00 LT (Healing Service)",
       "Friday: 2:00 - 6:00 LT (Fasting and prayer )",
       "Sunday: 3:00 - 6:00 LT (Sunday Service) ",
-      "Sunday: 9:00 - 12:00 LT(Youth Progrma"
+      "Sunday: 9:00 - 12:00 LT(Youth Program)"
     ],
-    "churchLeader": "Pastor Ruth Bekele",
+    "churchLeader": "Pastor Shewu",
     "leaderTitle": "pastor",
     "leaderPhone": "N/A",
     "hasParking": true,
     "language": "Amharic and Afaan Oromoo",
     "directionDescription": "N/A"
+  },
+
+  {
+    "id": "9",
+    "name": "Kara Demamit Mulu Wengel Church",
+    "latitude": 9.047831960127217, 
+    "longitude": 38.855412072923585,
+    "images": [],
+    "serviceTimes": [
+      "Sunday: 4:00 - 7:00 LT (Sunday Service)"
+    ],
+    "churchLeader": "Pastor Shemelis T.",
+    "leaderTitle": "pastor",
+    "leaderPhone": "N/A",
+    "hasParking": false,
+    "language": "Amharic",
+    "directionDescription": "Around Zerfe Bono"
+  },
+  {
+    "id": "10",
+    "name": "Jemo Terara Mulu Wengel Church",
+    "latitude": 9.000093727516566, 
+    "longitude": 38.67532762128679,
+    "images": ["assets/images/Jemo1.jpg",
+    "assets/images/Jemo2.jpg"
+  ],
+    "serviceTimes": [
+      "Tuesday: 12:00 - 2:00 LT (Sermon)",
+      "Thursday: 11:00 - 1:30 LT (Healing Services)",
+      "Friday: 2:00 - 6:00 LT (Fasting and prayer )",
+      "Saturday: 9:00 - 11:00  (Teenage Service)",
+      "Saturday: 12:00 - 2:00  (Youth Service)",
+      "Sunday: 3:00 - 6:00 LT (Sunday Service)"
+    ],
+    "churchLeader": "Pastor Dereje",
+    "leaderTitle": "pastor",
+    "leaderPhone": "N/A",
+    "hasParking": false,
+    "language": "Amharic",
+    "directionDescription": "Around Alem Bank Deldey"
+  },
+   {
+    "id": "11",
+    "name": "Kotebe Meserete Kiristos church",
+    "latitude": 9.040069549072554, 
+    "longitude": 38.843683979761146,
+    "images": [
+      "assets/images/Kotebe1.png",
+      "assets/images/Kotebe2.png"
+    ],
+    "serviceTimes": [
+      "Tuesday: 11:00 - 2:00 LT (Sermon)",
+      "Wednesday: 11:00 - 2:00 LT (Healing and Prayer Service)",
+      "Friday: 2:00 - 6:00 LT (Fasting and prayer )",
+      "Saturday: 8:30 - 10:30 LT (Teenage Service)",
+      "Saturday: 11:00 - 2:00 LT (Youth Service)",
+      "Sunday: 3:00 - 6:30 LT (Sunday Service)"
+    ],
+    "churchLeader": "Pastor Adiss.",
+    "leaderTitle": "pastor",
+    "leaderPhone": "N/A",
+    "hasParking": true,
+    "language": "Amharic",
+    "directionDescription": "Around Kotebe 1 Fermata"
+  },
+  {
+    "id": "12",
+    "name": "Hawassa Mulu Wengel Church",
+    "latitude": 9.040069549072554, 
+    "longitude": 38.843683979761146,
+    "images": [
+      "assets/images/Kotebe1.png",
+      "assets/images/Kotebe2.png"
+    ],
+    "serviceTimes": [
+    
+      "Sunday: 1:30 - 4:00 LT (First Session) ",
+      "Sunday: 4:30 - 7:00 LT (Second Session) "
+    ],
+    "churchLeader": "Pastor Adane A.",
+    "leaderTitle": "pastor",
+    "leaderPhone": "N/A",
+    "hasParking": true,
+    "language": "Amharic",
+    "directionDescription": "Around Atote, Hawassa"
   }
+  
+  
+  
 ]

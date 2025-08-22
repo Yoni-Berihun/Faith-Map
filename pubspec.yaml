@@ -37,12 +37,18 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/images/splash_logo.png
+    - assets/images/Splash_logo.png
     - assets/images/iec (2).jpg
     - assets/images/iec (1).jpg
     - assets/images/Asko MKC.jpg
     - assets/images/Slide_1.png 
     - assets/images/Slide_2.png 
     - assets/images/Slide_3.png 
+    - assets/images/Kotebe1.png 
+    - assets/images/Kotebe2.png
+    - assets/images/Sebeta1.jpg
+    - assets/images/Sebeta2.jpg
+    - assets/images/Sebeta3.jpg
+    - assets/images/Jemo1.jpg
+    - assets/images/Jemo2.jpg  
     - assets/data/churches.json
-    - assets/animations/Scene.json
