@@ -50,7 +50,7 @@ See how FaithMap brings faith to life on your screen:
 ![Church Listings Screenshot](im2.jpg)  
 *Explore and connect: Detailed listings with maps, services, and amenities at a glance.*
 
-![QR Code for APK Download](qr.jpg)  
+![QR Code for APK Download](qr.png)  
 *Scan to Download: Get the APK from Google Drive and start your journey today!*
 
 ---
